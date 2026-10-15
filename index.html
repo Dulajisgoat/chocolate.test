@@ -33,14 +33,14 @@
 
       --focus-ring: 2px solid rgba(167, 139, 250, 0.55);
 
-      /* ── Stripe-ish motion system ───────────────────────── */
+      /* ── Motion system ───────────────────────────────────── */
       --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
       --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
       --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
       --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-      --t-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
-      --t: 240ms cubic-bezier(0.16, 1, 0.3, 1);
-      --t-slow: 520ms cubic-bezier(0.16, 1, 0.3, 1);
+      --t-fast: 180ms cubic-bezier(0.4, 0, 0.2, 1);
+      --t: 260ms cubic-bezier(0.16, 1, 0.3, 1);
+      --t-slow: 560ms cubic-bezier(0.16, 1, 0.3, 1);
 
       --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -71,35 +71,60 @@
     .row-checkbox { cursor: pointer; }
 
     /* ============================================================
-       SHARED KEYFRAMES
+       SHARED KEYFRAMES — choreographed, layered, materialize
        ============================================================ */
     @keyframes riseIn {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(12px); filter: blur(3px); }
+      to   { opacity: 1; transform: translateY(0); filter: blur(0); }
     }
     @keyframes fadeIn {
       from { opacity: 0; }
       to   { opacity: 1; }
     }
+    @keyframes sidebarIn {
+      from { opacity: 0; transform: translateX(-10px); filter: blur(3px); }
+      to   { opacity: 1; transform: translateX(0); filter: blur(0); }
+    }
+    @keyframes mainIn {
+      from { opacity: 0; transform: translateX(8px); filter: blur(3px); }
+      to   { opacity: 1; transform: translateX(0); filter: blur(0); }
+    }
+    @keyframes dialogChildIn {
+      from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+      to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
+    @keyframes btnAppear {
+      from { opacity: 0; transform: translateX(10px) scale(0.94); filter: blur(2px); }
+      to   { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+    }
+    @keyframes messageFlash {
+      0%   { opacity: 0.2; transform: translateY(4px); filter: blur(2px); }
+      60%  { opacity: 1; transform: translateY(0); filter: blur(0); }
+      100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    }
     @keyframes toastIn {
-      from { opacity: 0; transform: translateY(8px) scale(0.98); }
-      to   { opacity: 1; transform: translateY(0) scale(1); }
+      from { opacity: 0; transform: translateY(10px) scale(0.96); filter: blur(3px); }
+      to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
     @keyframes toastOut {
-      to { opacity: 0; transform: translateY(8px) scale(0.98); }
+      to { opacity: 0; transform: translateY(10px) scale(0.96); filter: blur(3px); }
     }
     @keyframes checkPop {
-      0%   { transform: scale(0.8); }
-      55%  { transform: scale(1.15); }
+      0%   { transform: scale(0.7); }
+      55%  { transform: scale(1.18); }
       100% { transform: scale(1); }
     }
     @keyframes statusPulse {
       0%   { box-shadow: 0 0 0 0 rgba(134, 239, 172, 0.55); }
-      100% { box-shadow: 0 0 0 10px rgba(134, 239, 172, 0); }
+      100% { box-shadow: 0 0 0 12px rgba(134, 239, 172, 0); }
     }
     @keyframes statusPulseSoft {
       0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35); }
       100% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0); }
+    }
+    @keyframes lineGrow {
+      from { transform: scaleX(0); opacity: 0; }
+      to   { transform: scaleX(1); opacity: 1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -122,11 +147,17 @@
       padding: 24px;
       z-index: 2000;
       overflow-y: auto;
-      transition: opacity 320ms var(--ease-out-expo);
+      transition:
+        opacity 420ms var(--ease-out-expo),
+        transform 520ms var(--ease-out-expo),
+        filter 420ms var(--ease-out-expo);
+      will-change: opacity, transform, filter;
     }
     .login-screen.hidden {
       opacity: 0;
       pointer-events: none;
+      transform: scale(1.015);
+      filter: blur(6px);
     }
 
     .login-shell {
@@ -138,8 +169,8 @@
       border-radius: 16px;
       padding: 52px 44px 36px;
       position: relative;
-      animation: riseIn 620ms var(--ease-out-expo) both;
-      transition: border-color 300ms var(--ease-out-expo);
+      animation: riseIn 720ms var(--ease-out-expo) both;
+      transition: border-color 320ms var(--ease-out-expo);
     }
     .login-shell:hover { border-color: rgba(255, 255, 255, 0.12); }
 
@@ -155,7 +186,7 @@
       line-height: 1;
       color: #ffffff;
       margin-bottom: 18px;
-      animation: riseIn 700ms var(--ease-out-expo) 60ms both;
+      animation: riseIn 780ms var(--ease-out-expo) 60ms both;
     }
     .login-name {
       font-size: 32px;
@@ -163,7 +194,7 @@
       letter-spacing: -0.01em;
       color: #ffffff;
       line-height: 1.2;
-      animation: riseIn 700ms var(--ease-out-expo) 120ms both;
+      animation: riseIn 780ms var(--ease-out-expo) 130ms both;
     }
     .login-tagline {
       font-size: 11px;
@@ -174,7 +205,7 @@
       margin: 8px 0 32px;
       padding-bottom: 0;
       border-bottom: none;
-      animation: riseIn 700ms var(--ease-out-expo) 180ms both;
+      animation: riseIn 780ms var(--ease-out-expo) 200ms both;
     }
     .login-tagline::after {
       content: '';
@@ -184,15 +215,9 @@
       background: rgba(255, 255, 255, 0.55);
       margin: 24px auto 0;
       transform-origin: center;
-      animation: lineGrow 900ms var(--ease-out-expo) 380ms both;
-    }
-    @keyframes lineGrow {
-      from { transform: scaleX(0); opacity: 0; }
-      to   { transform: scaleX(1); opacity: 1; }
+      animation: lineGrow 1000ms var(--ease-out-expo) 420ms both;
     }
 
-    /* Superscript "99" on the brand mark — sized and raised so it
-       reads as a power/exponent of the V, not as inline text. */
     .login-glyph sup,
     .brand-glyph sup {
       font-size: 0.40em;
@@ -207,10 +232,10 @@
     .login-form-group {
       margin-bottom: 26px;
       position: relative;
-      animation: riseIn 620ms var(--ease-out-expo) both;
+      animation: riseIn 700ms var(--ease-out-expo) both;
     }
-    .login-form-group:nth-of-type(1) { animation-delay: 260ms; }
-    .login-form-group:nth-of-type(2) { animation-delay: 320ms; }
+    .login-form-group:nth-of-type(1) { animation-delay: 280ms; }
+    .login-form-group:nth-of-type(2) { animation-delay: 360ms; }
 
     .login-form-group label {
       display: block;
@@ -220,7 +245,7 @@
       color: var(--text-muted);
       font-weight: 500;
       margin-bottom: 8px;
-      transition: color 240ms var(--ease-out-expo);
+      transition: color 260ms var(--ease-out-expo);
     }
     .login-form-group:focus-within label { color: var(--text-soft); }
 
@@ -234,16 +259,15 @@
       font-size: 16px;
       color: var(--text);
       outline: none;
-      transition: border-color 240ms var(--ease-out-expo);
+      transition: border-color 260ms var(--ease-out-expo);
     }
     .login-form-group input::placeholder {
       color: rgba(255, 255, 255, 0.28);
       font-style: normal;
-      transition: opacity 240ms var(--ease-out-expo);
+      transition: opacity 260ms var(--ease-out-expo);
     }
     .login-form-group input:focus::placeholder { opacity: 0.5; }
 
-    /* Stripe-style underline that grows from the center on focus */
     .login-form-group::after,
     .dialog-input-group::after {
       content: '';
@@ -255,7 +279,7 @@
       background: #ffffff;
       transform: scaleX(0);
       transform-origin: center;
-      transition: transform 480ms var(--ease-out-expo);
+      transition: transform 520ms var(--ease-out-expo);
       pointer-events: none;
     }
     .login-form-group:focus-within::after,
@@ -267,7 +291,7 @@
       display: flex;
       gap: 12px;
       margin-top: 34px;
-      animation: riseIn 620ms var(--ease-out-expo) 380ms both;
+      animation: riseIn 700ms var(--ease-out-expo) 440ms both;
     }
     .btn-auth {
       flex: 1;
@@ -282,8 +306,8 @@
         background-color var(--t-fast),
         color var(--t-fast),
         border-color var(--t-fast),
-        box-shadow 300ms var(--ease-out-expo),
-        transform 200ms var(--ease-spring);
+        box-shadow 340ms var(--ease-out-expo),
+        transform 260ms var(--ease-spring);
       border: 1px solid transparent;
       will-change: transform;
     }
@@ -294,18 +318,18 @@
       background: var(--btn-solid-bg);
       color: var(--btn-solid-fg);
       border-color: #ffffff;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(255, 255, 255, 0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
     .btn-auth-primary:hover:not(:disabled) {
       background: #e8e8e8;
       border-color: #e8e8e8;
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.14), 0 1px 2px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.16), 0 1px 2px rgba(0, 0, 0, 0.3);
       transform: translateY(-1px);
     }
     .btn-auth-primary:active:not(:disabled) {
-      transform: translateY(0) scale(0.985);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-      transition-duration: 80ms;
+      transform: translateY(0) scale(0.975);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      transition-duration: 90ms;
     }
 
     .btn-auth-secondary {
@@ -317,11 +341,12 @@
       border-color: #ffffff;
       background: rgba(255, 255, 255, 0.04);
       transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
     .btn-auth-secondary:active:not(:disabled) {
-      transform: translateY(0) scale(0.985);
+      transform: translateY(0) scale(0.975);
       background: rgba(255, 255, 255, 0.06);
-      transition-duration: 80ms;
+      transition-duration: 90ms;
     }
 
     .login-message {
@@ -331,8 +356,13 @@
       min-height: 19px;
       letter-spacing: 0.01em;
       color: var(--text-muted);
-      transition: color 240ms var(--ease-out-expo);
-      animation: fadeIn 400ms var(--ease-out-expo) 480ms both;
+      transition: color 260ms var(--ease-out-expo);
+      animation: fadeIn 500ms var(--ease-out-expo) 540ms both;
+    }
+    .login-message.error,
+    .login-message.success,
+    .login-message.loading {
+      animation: messageFlash 480ms var(--ease-out-expo);
     }
     .login-message.error { color: var(--error-tone); }
     .login-message.success { color: var(--success); }
@@ -343,7 +373,7 @@
       padding-top: 22px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       text-align: center;
-      animation: fadeIn 500ms var(--ease-out-expo) 560ms both;
+      animation: fadeIn 560ms var(--ease-out-expo) 620ms both;
     }
     .powered-by {
       font-size: 11px;
@@ -374,7 +404,7 @@
       flex-direction: column;
       height: 100%;
       overflow: hidden;
-      animation: fadeIn 400ms var(--ease-out-expo) both;
+      animation: sidebarIn 700ms var(--ease-out-expo) both;
     }
 
     .sidebar-header {
@@ -424,8 +454,8 @@
       transition:
         background-color var(--t-fast),
         border-color var(--t-fast),
-        box-shadow 260ms var(--ease-out-expo),
-        transform 200ms var(--ease-spring);
+        box-shadow 300ms var(--ease-out-expo),
+        transform 240ms var(--ease-spring);
     }
     .btn-new:hover {
       border-color: #ffffff;
@@ -433,7 +463,7 @@
       box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.04);
       transform: translateY(-1px);
     }
-    .btn-new:active { transform: scale(0.94); transition-duration: 80ms; }
+    .btn-new:active { transform: scale(0.9); transition-duration: 90ms; }
     .btn-new:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
     .btn-new svg { width: 12px; height: 12px; }
 
@@ -445,20 +475,21 @@
     .org-item {
       padding: 9px 16px;
       cursor: pointer;
-      transition: background-color 240ms var(--ease-out-expo);
+      transition: background-color 260ms var(--ease-out-expo);
       position: relative;
       display: flex;
       align-items: center;
       gap: 10px;
       background: transparent;
-      animation: riseIn 480ms var(--ease-out-expo) 120ms both;
+      animation: riseIn 540ms var(--ease-out-expo) 160ms both;
     }
     .org-item:hover { background: rgba(255, 255, 255, 0.04); }
     .org-item.active {
       background: rgba(167, 139, 250, 0.08);
       box-shadow: inset 2px 0 0 var(--accent);
-      transition: background-color 320ms var(--ease-out-expo),
-                  box-shadow 320ms var(--ease-out-expo);
+      transition:
+        background-color 360ms var(--ease-out-expo),
+        box-shadow 360ms var(--ease-out-expo);
     }
 
     .org-dot {
@@ -466,8 +497,9 @@
       border-radius: 50%;
       background: var(--text-muted);
       flex-shrink: 0;
-      transition: background-color 320ms var(--ease-out-expo),
-                  box-shadow 320ms var(--ease-out-expo);
+      transition:
+        background-color 360ms var(--ease-out-expo),
+        box-shadow 360ms var(--ease-out-expo);
     }
     .org-item.active .org-dot { background: #ffffff; }
 
@@ -479,7 +511,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: color 240ms var(--ease-out-expo);
+      transition: color 260ms var(--ease-out-expo);
     }
     .org-item.active .org-item-title { color: #ffffff; }
     .org-item-sub {
@@ -525,7 +557,9 @@
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      transition: border-color var(--t-fast), background-color var(--t-fast);
+      transition:
+        border-color var(--t-fast),
+        background-color var(--t-fast);
     }
     .footer-link {
       cursor: pointer;
@@ -545,7 +579,7 @@
       background: currentColor;
       transform: scaleX(0);
       transform-origin: left;
-      transition: transform 320ms var(--ease-out-expo);
+      transition: transform 360ms var(--ease-out-expo);
     }
     .footer-link:hover { color: #ffffff; }
     .footer-link:hover::after { transform: scaleX(1); }
@@ -559,6 +593,7 @@
       height: 100%;
       min-width: 0;
       background: var(--panel);
+      animation: mainIn 760ms var(--ease-out-expo) 80ms both;
     }
 
     .main-top-bar {
@@ -572,7 +607,7 @@
       background: var(--panel);
       border-bottom: 1px solid var(--line-soft);
       z-index: 10;
-      animation: fadeIn 500ms var(--ease-out-expo) 60ms both;
+      animation: riseIn 620ms var(--ease-out-expo) 140ms both;
     }
 
     .status-indicator {
@@ -582,26 +617,27 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      transition: color 320ms var(--ease-out-expo);
+      transition: color 360ms var(--ease-out-expo);
     }
     .status-dot {
       width: 5px; height: 5px;
       border-radius: 50%;
       background: var(--text-muted);
-      transition: background-color 320ms var(--ease-out-expo);
+      transition: background-color 360ms var(--ease-out-expo);
     }
     .status-indicator.saved { color: var(--success); }
     .status-indicator.saved .status-dot {
       background: var(--success);
-      animation: statusPulse 1000ms var(--ease-out-expo);
+      animation: statusPulse 1100ms var(--ease-out-expo);
     }
     .status-indicator.loading { color: var(--text-soft); }
     .status-indicator.loading .status-dot {
       background: var(--text-soft);
-      animation: statusPulseSoft 1200ms var(--ease-out-expo) infinite;
+      animation: statusPulseSoft 1300ms var(--ease-out-expo) infinite;
     }
 
     .main-actions { display: flex; gap: 8px; }
+
     .btn-action {
       height: 32px;
       padding: 0 16px;
@@ -622,17 +658,17 @@
         background-color var(--t-fast),
         color var(--t-fast),
         border-color var(--t-fast),
-        box-shadow 300ms var(--ease-out-expo),
-        transform 200ms var(--ease-spring);
+        box-shadow 340ms var(--ease-out-expo),
+        transform 260ms var(--ease-spring);
       will-change: transform;
     }
     .btn-action:hover {
       border-color: #ffffff;
       background: rgba(255, 255, 255, 0.04);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     }
-    .btn-action:active { transform: translateY(0) scale(0.98); transition-duration: 80ms; }
+    .btn-action:active { transform: translateY(0) scale(0.97); transition-duration: 90ms; }
     .btn-action:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
     .btn-action.primary {
       background: var(--btn-solid-bg);
@@ -643,13 +679,18 @@
     .btn-action.primary:hover {
       background: #e8e8e8;
       border-color: #e8e8e8;
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.14), 0 1px 2px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.16), 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    /* When JS toggles this from display:none → flex, the animation
+       plays so the button "arrives" instead of popping in. */
+    .btn-action.danger {
+      animation: btnAppear 420ms var(--ease-out-expo);
     }
     .btn-action.danger:hover {
       border-color: var(--danger);
       color: var(--danger);
       background: rgba(252, 165, 165, 0.06);
-      box-shadow: 0 4px 14px rgba(252, 165, 165, 0.08);
+      box-shadow: 0 6px 18px rgba(252, 165, 165, 0.10);
     }
 
     .main-scroll {
@@ -666,12 +707,20 @@
       padding: 24px 28px 64px;
     }
 
+    /* Every fresh child of main-inner gets a choreographed entrance —
+       this is what makes table ↔ empty-state swaps feel continuous. */
+    .main-inner > * {
+      animation: riseIn 620ms var(--ease-out-expo) both;
+    }
+    .main-inner > *:nth-child(1) { animation-delay: 60ms; }
+    .main-inner > *:nth-child(2) { animation-delay: 140ms; }
+    .main-inner > *:nth-child(3) { animation-delay: 220ms; }
+
     .org-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       margin-bottom: 6px;
-      animation: riseIn 500ms var(--ease-out-expo) 120ms both;
     }
     .org-title {
       font-size: 22px;
@@ -692,7 +741,6 @@
       margin-bottom: 20px;
       padding-bottom: 16px;
       border-bottom: 1px solid var(--line-soft);
-      animation: riseIn 500ms var(--ease-out-expo) 180ms both;
     }
     .org-meta .dot {
       width: 3px; height: 3px;
@@ -707,8 +755,7 @@
       background: var(--panel);
       border: 1px solid var(--panel-edge);
       border-radius: 12px;
-      animation: riseIn 560ms var(--ease-out-expo) 240ms both;
-      transition: border-color 320ms var(--ease-out-expo);
+      transition: border-color 340ms var(--ease-out-expo);
     }
     .empty-state:hover { border-color: rgba(255, 255, 255, 0.12); }
     .empty-state svg {
@@ -731,7 +778,6 @@
       border-radius: 12px;
       overflow-x: auto;
       overflow-y: hidden;
-      animation: riseIn 560ms var(--ease-out-expo) 240ms both;
     }
     table {
       width: 100%;
@@ -752,25 +798,25 @@
       padding: 10px 14px;
       border-bottom: 1px solid var(--line-soft);
       color: var(--text);
-      transition: background-color 240ms var(--ease-out-expo);
+      transition: background-color 260ms var(--ease-out-expo);
     }
     tr:last-child td { border-bottom: none; }
 
-    /* Staggered row entrance */
+    /* Staggered row entrance — each row materializes 30ms after the last */
     tbody tr {
-      animation: riseIn 420ms var(--ease-out-expo) both;
+      animation: riseIn 520ms var(--ease-out-expo) both;
     }
-    tbody tr:nth-child(1)  { animation-delay: 300ms; }
-    tbody tr:nth-child(2)  { animation-delay: 330ms; }
-    tbody tr:nth-child(3)  { animation-delay: 360ms; }
-    tbody tr:nth-child(4)  { animation-delay: 390ms; }
-    tbody tr:nth-child(5)  { animation-delay: 420ms; }
-    tbody tr:nth-child(6)  { animation-delay: 450ms; }
-    tbody tr:nth-child(7)  { animation-delay: 480ms; }
-    tbody tr:nth-child(8)  { animation-delay: 510ms; }
-    tbody tr:nth-child(9)  { animation-delay: 540ms; }
-    tbody tr:nth-child(10) { animation-delay: 570ms; }
-    tbody tr:nth-child(n+11) { animation-delay: 600ms; }
+    tbody tr:nth-child(1)  { animation-delay: 260ms; }
+    tbody tr:nth-child(2)  { animation-delay: 290ms; }
+    tbody tr:nth-child(3)  { animation-delay: 320ms; }
+    tbody tr:nth-child(4)  { animation-delay: 350ms; }
+    tbody tr:nth-child(5)  { animation-delay: 380ms; }
+    tbody tr:nth-child(6)  { animation-delay: 410ms; }
+    tbody tr:nth-child(7)  { animation-delay: 440ms; }
+    tbody tr:nth-child(8)  { animation-delay: 470ms; }
+    tbody tr:nth-child(9)  { animation-delay: 500ms; }
+    tbody tr:nth-child(10) { animation-delay: 530ms; }
+    tbody tr:nth-child(n+11) { animation-delay: 560ms; }
 
     tbody tr:hover td { background: rgba(255, 255, 255, 0.03); }
 
@@ -791,9 +837,9 @@
       background: transparent;
       vertical-align: middle;
       transition:
-        background-color 200ms var(--ease-out-expo),
-        border-color 200ms var(--ease-out-expo),
-        box-shadow 260ms var(--ease-out-expo);
+        background-color 220ms var(--ease-out-expo),
+        border-color 220ms var(--ease-out-expo),
+        box-shadow 300ms var(--ease-out-expo);
       will-change: transform;
     }
     input[type="checkbox"]:hover {
@@ -804,7 +850,7 @@
     input[type="checkbox"]:checked {
       background: #ffffff;
       border-color: #ffffff;
-      animation: checkPop 340ms var(--ease-spring);
+      animation: checkPop 380ms var(--ease-spring);
     }
     input[type="checkbox"]:checked::after {
       content: '';
@@ -841,29 +887,29 @@
         background-color var(--t-fast),
         color var(--t-fast),
         border-color var(--t-fast),
-        box-shadow 260ms var(--ease-out-expo),
-        transform 200ms var(--ease-spring);
+        box-shadow 300ms var(--ease-out-expo),
+        transform 240ms var(--ease-spring);
       will-change: transform;
     }
     .btn-row svg {
       width: 12px; height: 12px;
-      transition: transform 500ms var(--ease-out-expo);
+      transition: transform 560ms var(--ease-out-expo);
     }
     .btn-row:hover {
       border-color: #ffffff;
       color: #ffffff;
       background: rgba(255, 255, 255, 0.04);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     }
     .btn-row:hover svg { transform: rotate(-180deg); }
-    .btn-row:active { transform: translateY(0) scale(0.97); transition-duration: 80ms; }
+    .btn-row:active { transform: translateY(0) scale(0.95); transition-duration: 90ms; }
     .btn-row:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
     .btn-row.danger:hover {
       border-color: var(--danger);
       color: var(--danger);
       background: rgba(252, 165, 165, 0.06);
-      box-shadow: 0 4px 14px rgba(252, 165, 165, 0.10);
+      box-shadow: 0 6px 18px rgba(252, 165, 165, 0.12);
     }
 
     /* Dialogs */
@@ -880,16 +926,15 @@
       visibility: hidden;
       pointer-events: none;
       transition:
-        opacity 260ms var(--ease-out-expo),
-        visibility 0s linear 260ms,
-        backdrop-filter 300ms var(--ease-out-expo);
+        opacity 300ms var(--ease-out-expo),
+        visibility 0s linear 300ms;
     }
     .dialog-overlay.active {
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
       transition:
-        opacity 260ms var(--ease-out-expo),
+        opacity 300ms var(--ease-out-expo),
         visibility 0s linear 0s;
     }
 
@@ -905,16 +950,33 @@
       max-width: 460px;
       margin: auto;
       padding: 30px;
-      transform: translateY(14px) scale(0.965);
+      transform: translateY(18px) scale(0.955);
       opacity: 0;
       transition:
-        transform 400ms var(--ease-out-expo),
-        opacity 300ms var(--ease-out-expo);
+        transform 480ms var(--ease-out-expo),
+        opacity 340ms var(--ease-out-expo);
       will-change: transform, opacity;
     }
     .dialog-overlay.active .dialog-box {
       transform: translateY(0) scale(1);
       opacity: 1;
+    }
+
+    /* Every dialog's direct children stagger in — this also runs
+       when JS swaps the dialog's innerHTML (e.g. Add Account →
+       Credentials), giving the swap a smooth, choreographed feel. */
+    .dialog-box > * {
+      animation: dialogChildIn 520ms var(--ease-out-expo) both;
+    }
+    .dialog-box > *:nth-child(1) { animation-delay: 100ms; }
+    .dialog-box > *:nth-child(2) { animation-delay: 160ms; }
+    .dialog-box > *:nth-child(3) { animation-delay: 220ms; }
+    .dialog-box > *:nth-child(4) { animation-delay: 280ms; }
+    .dialog-box > *:nth-child(5) { animation-delay: 340ms; }
+    .dialog-box > *:nth-child(6) { animation-delay: 400ms; }
+    /* Hidden custom-pass group appears instantly when toggled */
+    .dialog-box > #customPassGroup {
+      animation-delay: 0ms;
     }
 
     .dialog-title {
@@ -942,7 +1004,7 @@
       color: var(--text-muted);
       font-weight: 500;
       margin-bottom: 6px;
-      transition: color 240ms var(--ease-out-expo);
+      transition: color 260ms var(--ease-out-expo);
     }
     .dialog-input-group:focus-within label { color: var(--text-soft); }
     .dialog-input {
@@ -955,7 +1017,7 @@
       font-size: 15px;
       color: var(--text);
       outline: none;
-      transition: border-color 240ms var(--ease-out-expo);
+      transition: border-color 260ms var(--ease-out-expo);
     }
     .dialog-input::placeholder {
       color: rgba(255, 255, 255, 0.28);
@@ -984,17 +1046,22 @@
       font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
+      transform: scale(0.985);
       transition:
-        background-color 240ms var(--ease-out-expo),
-        color 240ms var(--ease-out-expo),
-        transform 200ms var(--ease-spring);
+        background-color 320ms var(--ease-out-expo),
+        color 320ms var(--ease-out-expo),
+        box-shadow 340ms var(--ease-out-expo),
+        transform 320ms var(--ease-spring);
+      will-change: transform;
     }
     .toggle-btn:hover { color: #ffffff; }
-    .toggle-btn:active { transform: scale(0.97); transition-duration: 80ms; }
+    .toggle-btn:active { transform: scale(0.94); transition-duration: 100ms; }
     .toggle-btn:focus-visible { outline: var(--focus-ring); outline-offset: 0; }
     .toggle-btn.active {
       background: var(--btn-solid-bg);
       color: var(--btn-solid-fg);
+      transform: scale(1);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     }
 
     .dialog-actions {
@@ -1019,17 +1086,17 @@
         background-color var(--t-fast),
         color var(--t-fast),
         border-color var(--t-fast),
-        box-shadow 300ms var(--ease-out-expo),
-        transform 200ms var(--ease-spring);
+        box-shadow 340ms var(--ease-out-expo),
+        transform 260ms var(--ease-spring);
       will-change: transform;
     }
     .btn-primary:hover {
       border-color: #ffffff;
       background: rgba(255, 255, 255, 0.04);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     }
-    .btn-primary:active { transform: translateY(0) scale(0.98); transition-duration: 80ms; }
+    .btn-primary:active { transform: translateY(0) scale(0.97); transition-duration: 90ms; }
     .btn-primary:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
     .btn-primary.main {
       background: var(--btn-solid-bg);
@@ -1040,7 +1107,7 @@
     .btn-primary.main:hover {
       background: #e8e8e8;
       border-color: #e8e8e8;
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.14), 0 1px 2px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.16), 0 1px 2px rgba(0, 0, 0, 0.3);
     }
     .btn-primary.destructive {
       background: transparent;
@@ -1050,7 +1117,7 @@
     .btn-primary.destructive:hover {
       background: rgba(252, 165, 165, 0.08);
       border-color: var(--danger);
-      box-shadow: 0 6px 20px rgba(252, 165, 165, 0.14);
+      box-shadow: 0 8px 24px rgba(252, 165, 165, 0.16);
     }
 
     /* Toast */
@@ -1077,12 +1144,12 @@
       font-size: 13px;
       font-weight: 500;
       color: var(--text);
-      animation: toastIn 420ms var(--ease-out-expo) both;
+      animation: toastIn 460ms var(--ease-out-expo) both;
       pointer-events: auto;
       min-width: 240px;
       max-width: 90vw;
     }
-    .toast.exit { animation: toastOut 220ms var(--ease-standard) forwards; }
+    .toast.exit { animation: toastOut 240ms var(--ease-standard) forwards; }
     .toast svg { width: 16px; height: 16px; flex-shrink: 0; }
     .toast.success { border-left-color: var(--success); }
     .toast.error { border-left-color: var(--danger); }
