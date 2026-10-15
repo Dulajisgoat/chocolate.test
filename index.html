@@ -3,179 +3,1680 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StudyAI | Study Smarter</title>
-  <meta name="description" content="A simple study workspace for revision notes, flashcards and quizzes.">
-  <link rel="stylesheet" href="style.css">
+  <title>Vault X — Organization Manager</title>
   <style>
-    /* Ensures the native hidden attribute always wins over component display rules */
-    [hidden] { display: none !important; }
-    /* Keeps the stat numbers looking like the former h2 headings */
-    .stat-number { font-size: 1.5em; font-weight: bold; margin: 0.83em 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* --- surfaces --- */
+      --bg:             #f3f3f0;
+      --surface:        #ffffff;
+      --surface-2:      #fafaf8;
+      --hover:          #f0f0eb;
+
+      /* --- lines --- */
+      --border:         #dcdcd5;
+      --border-strong:  #b6b6ae;
+
+      /* --- type --- */
+      --text:           #17171a;
+      --text-soft:      #3a3a3e;
+      --text-muted:     #76767c;
+
+      /* --- one accent, used sparingly --- */
+      --accent:         #2d6a4f;
+      --accent-hover:   #245741;
+      --accent-soft:    #e9f1ec;
+
+      --danger:         #a12d20;
+      --danger-soft:    #fbebe9;
+      --success:        #2d6a4f;
+
+      --radius:         4px;
+      --radius-card:    6px;
+      --radius-dialog:  8px;
+      --t:              120ms ease;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+              "Helvetica Neue", Arial, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+              "Liberation Mono", monospace;
+      --serif: var(--sans);
+
+      /* Legacy aliases — the script injects inline styles that reference
+         several of the old variable names. These keep them resolving. */
+      --glass:               var(--surface);
+      --glass-strong:        var(--surface);
+      --glass-hover:         var(--hover);
+      --glass-border:        var(--border);
+      --glass-border-strong: var(--border-strong);
+      --inner-glow:          none;
+      --glow:                none;
+      --shadow-soft:         none;
+      --shadow-md:           none;
+      --blur:                none;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body { background: var(--bg); }
+
+    ::selection { background: #cfe0d6; color: var(--text); }
+
+    button { font-family: inherit; }
+    input  { font-family: inherit; }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    /* ============================================================
+       LOGIN
+       ============================================================ */
+    .login-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 2000;
+      overflow-y: auto;
+      background: var(--bg);
+      transition: opacity 0.15s ease;
+    }
+    .login-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .login-shell {
+      width: 100%;
+      max-width: 380px;
+      margin: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-dialog);
+      padding: 32px 28px 24px;
+    }
+
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .login-glyph {
+      width: 30px; height: 30px;
+      display: grid; place-items: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+    .login-name {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+    .login-tagline {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 26px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .login-form-group { margin-bottom: 16px; }
+    .login-form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+    .login-form-group input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 11px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color var(--t);
+    }
+    .login-form-group input::placeholder { color: #a8a8a4; }
+    .login-form-group input:focus {
+      border-color: var(--accent);
+      outline: 2px solid var(--accent-soft);
+      outline-offset: 0;
+    }
+
+    .login-button-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 22px;
+    }
+    .btn-auth {
+      flex: 1;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background var(--t), border-color var(--t), color var(--t);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-soft);
+    }
+    .btn-auth:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-auth-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-auth-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .btn-auth-secondary {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text-soft);
+    }
+    .btn-auth-secondary:hover:not(:disabled) {
+      background: var(--hover);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+
+    .login-message {
+      margin-top: 16px;
+      font-size: 13px;
+      min-height: 18px;
+      color: var(--text-muted);
+    }
+    .login-message.error   { color: var(--danger); }
+    .login-message.success { color: var(--success); }
+    .login-message.loading { color: var(--text-muted); }
+
+    .login-footer {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .powered-by .uniclvrpass { color: var(--text-soft); font-weight: 500; }
+
+    /* ============================================================
+       APP SHELL — full-bleed, flush panels
+       ============================================================ */
+    .app {
+      position: relative;
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .sidebar-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { display: flex; align-items: center; gap: 9px; }
+    .brand-glyph {
+      width: 24px; height: 24px;
+      display: grid; place-items: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: var(--surface-2);
+    }
+    .brand-name {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: var(--text);
+    }
+
+    .sidebar-list-head {
+      padding: 9px 10px 9px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .btn-new {
+      width: 22px; height: 22px;
+      background: var(--surface);
+      color: var(--text-soft);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      display: grid; place-items: center;
+      border-radius: 3px;
+      transition: background var(--t), border-color var(--t), color var(--t);
+    }
+    .btn-new:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .btn-new svg { width: 12px; height: 12px; }
+
+    .org-list { flex: 1; overflow-y: auto; padding: 4px 8px 8px; }
+    .org-list::-webkit-scrollbar { width: 8px; }
+    .org-list::-webkit-scrollbar-thumb {
+      background: #d5d5cf;
+      border-radius: 4px;
+      border: 2px solid var(--surface);
+    }
+
+    .org-item {
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: background var(--t);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border-radius: 3px;
+      box-shadow: inset 2px 0 0 transparent;
+    }
+    .org-item:hover { background: var(--hover); }
+    .org-item.active {
+      background: var(--accent-soft);
+      box-shadow: inset 2px 0 0 var(--accent);
+    }
+
+    .org-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #c4c4be;
+      flex-shrink: 0;
+    }
+    .org-item.active .org-dot { background: var(--accent); }
+
+    .org-item-content { flex: 1; min-width: 0; }
+    .org-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-soft);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .org-item.active .org-item-title { color: var(--accent-hover); font-weight: 600; }
+    .org-item-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sidebar-footer {
+      padding: 10px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-soft);
+      min-width: 0;
+    }
+    .footer-user span:last-child {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .footer-user .user-glyph {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+      border-radius: 3px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+      display: grid; place-items: center;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .footer-link {
+      cursor: pointer;
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color var(--t);
+    }
+    .footer-link:hover { color: var(--text); text-decoration: underline; }
+
+    /* ========== Main column ========== */
+    .main-area {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    .main-top-bar {
+      height: 48px;
+      flex-shrink: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status-indicator {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #c4c4be;
+      transition: background var(--t);
+    }
+    .status-indicator.saved          { color: var(--success); }
+    .status-indicator.saved   .status-dot { background: var(--success); }
+    .status-indicator.loading        { color: var(--text-soft); }
+    .status-indicator.loading .status-dot { background: var(--accent); }
+
+    .main-actions { display: flex; gap: 8px; }
+
+    .btn-action {
+      height: 30px;
+      padding: 0 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: background var(--t), border-color var(--t), color var(--t);
+    }
+    .btn-action:hover {
+      background: var(--hover);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .btn-action.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .btn-action.primary:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: #fff;
+    }
+    .btn-action.danger { color: var(--danger); border-color: #e6c4bf; }
+    .btn-action.danger:hover {
+      background: var(--danger-soft);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .main-scroll { flex: 1; overflow-y: auto; }
+    .main-scroll::-webkit-scrollbar { width: 10px; }
+    .main-scroll::-webkit-scrollbar-thumb {
+      background: #d5d5cf;
+      border-radius: 5px;
+      border: 3px solid var(--bg);
+    }
+
+    .main-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 24px 72px;
+    }
+
+    .org-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 4px;
+    }
+
+    .org-title {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .org-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .org-meta .dot {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: var(--border-strong);
+    }
+
+    .empty-state {
+      padding: 40px 24px;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+    }
+    .empty-state svg {
+      width: 26px; height: 26px;
+      margin-bottom: 12px;
+      stroke: var(--border-strong);
+    }
+    .empty-state-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .empty-state-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 340px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* ---------- Table ---------- */
+    .table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    th {
+      text-align: left;
+      padding: 9px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: var(--surface-2); }
+
+    .td-username {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--text);
+      word-break: break-all;
+    }
+    .checkbox-cell { width: 36px; padding-right: 0; }
+
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 15px;
+      height: 15px;
+      border: 1px solid var(--border-strong);
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      background: var(--surface);
+      vertical-align: middle;
+      transition: background var(--t), border-color var(--t);
+    }
+    input[type="checkbox"]:hover { border-color: var(--accent); }
+    input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    input[type="checkbox"]:checked::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 1px;
+      width: 4px;
+      height: 8px;
+      border: solid #fff;
+      border-width: 0 1.5px 1.5px 0;
+      transform: rotate(45deg);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+    .btn-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 4px 9px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-soft);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background var(--t), border-color var(--t), color var(--t);
+    }
+    .btn-row svg { width: 11px; height: 11px; }
+    .btn-row:hover {
+      background: var(--hover);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .btn-row.danger:hover {
+      background: var(--danger-soft);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ---------- Dialogs ---------- */
+    .dialog-overlay {
+      position: fixed; inset: 0;
+      background: rgba(20, 20, 18, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 3000;
+      opacity: 0;
+      overflow-y: auto;
+      transition: opacity 0.12s ease;
+    }
+    .dialog-overlay.active { display: flex; opacity: 1; }
+
+    .dialog-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-dialog);
+      width: 100%;
+      max-width: 420px;
+      margin: auto;
+      padding: 22px;
+      transform: translateY(-4px);
+      transition: transform 0.12s ease;
+    }
+    .dialog-overlay.active .dialog-box { transform: translateY(0); }
+
+    .dialog-title {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .dialog-text {
+      font-size: 13px;
+      color: var(--text-soft);
+      line-height: 1.55;
+      margin-bottom: 18px;
+    }
+    .dialog-text strong { color: var(--text); font-weight: 600; }
+
+    .dialog-input-group { margin-bottom: 14px; }
+    .dialog-input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-soft);
+      margin-bottom: 5px;
+    }
+    .dialog-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      color: var(--text);
+      font-size: 13.5px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color var(--t);
+    }
+    .dialog-input::placeholder { color: #a8a8a4; }
+    .dialog-input:focus {
+      border-color: var(--accent);
+      outline: 2px solid var(--accent-soft);
+      outline-offset: 0;
+    }
+    .dialog-input.mono {
+      font-family: var(--mono);
+      font-size: 12.5px;
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 14px;
+      padding: 3px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+    .toggle-btn {
+      flex: 1;
+      padding: 6px 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12.5px;
+      font-weight: 500;
+      transition: background var(--t), color var(--t), border-color var(--t);
+    }
+    .toggle-btn:hover { color: var(--text-soft); }
+    .toggle-btn.active {
+      background: var(--surface);
+      border-color: var(--border);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--t), border-color var(--t), color var(--t);
+    }
+    .btn-primary:hover {
+      background: var(--hover);
+      border-color: var(--border-strong);
+      color: var(--text);
+    }
+    .btn-primary.main {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 600;
+    }
+    .btn-primary.main:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+      color: #fff;
+    }
+    .btn-primary.destructive {
+      background: var(--danger);
+      border-color: var(--danger);
+      color: #fff;
+      font-weight: 600;
+    }
+    .btn-primary.destructive:hover {
+      background: #8a2519;
+      border-color: #8a2519;
+      color: #fff;
+    }
+
+    /* ---------- Toasts ---------- */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 4000;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border-strong);
+      padding: 10px 14px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+      pointer-events: auto;
+      min-width: 220px;
+      max-width: 90vw;
+      animation: slideIn 0.15s ease;
+    }
+    .toast.exit { animation: slideOut 0.15s ease forwards; }
+    .toast svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error   { border-left-color: var(--danger); }
+    .toast.success svg { color: var(--success); }
+    .toast.error   svg { color: var(--danger); }
+
+    @keyframes slideIn {
+      from { transform: translateY(4px); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+    @keyframes slideOut { to { transform: translateY(4px); opacity: 0; } }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 860px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+      .sidebar {
+        height: auto;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: nowrap;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      .sidebar-header { padding: 10px 8px 10px 14px; border-bottom: none; }
+      .brand-name { display: none; }
+      .sidebar-list-head { display: none; }
+      .org-list { padding: 6px 4px; overflow: hidden; min-width: 0; }
+      .org-item { padding: 6px 10px; box-shadow: none; }
+      .org-item.active { box-shadow: inset 0 -2px 0 var(--accent); }
+      .org-item-sub { display: none; }
+      .sidebar-footer { border-top: none; padding: 10px 14px 10px 8px; }
+      .footer-user span:last-child { max-width: 80px; }
+      .main-top-bar { padding: 0 12px; }
+      .btn-action { padding: 0 10px; }
+      .main-inner { padding: 18px 12px 64px; }
+      .org-title { font-size: 18px; }
+      .login-shell { padding: 26px 22px 20px; }
+      .dialog-box { padding: 20px 18px; }
+      .toast-container {
+        left: 12px; right: 12px; bottom: 12px;
+        width: auto;
+      }
+      .toast { min-width: 0; width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .status-indicator #statusText { display: none; }
+      .th-hide-mobile { display: none; }
+    }
   </style>
 </head>
 <body>
-  <aside class="sidebar" aria-label="Study workspace sidebar">
-    <p class="logo">Study<span>AI</span></p>
-    <p class="muted">YOUR STUDY SPACE</p>
 
-    <nav aria-label="Study workspace navigation">
-      <button type="button" class="nav active" data-page="home">⌂ &nbsp; Home</button>
-      <button type="button" class="nav" data-page="notes">▤ &nbsp; Study Notes</button>
-      <button type="button" class="nav" data-page="flashcards">▣ &nbsp; Flashcards</button>
-      <button type="button" class="nav" data-page="quiz">✓ &nbsp; Quiz</button>
-    </nav>
+<!--
+  ⚙️  BEFORE RUNNING THIS FILE:
+  1. Open the <script> tag at the bottom of this file.
+  2. Find the block marked "PASTE YOUR BACKEND VALUES BELOW".
+  3. Replace each "PASTE_..." string with your real Supabase values.
+-->
 
-    <div class="sidebar-bottom">
-      <button type="button" id="themeBtn" class="secondary full">☾ Toggle theme</button>
-      <p class="muted small">Study smarter, every day.</p>
+<!-- ============ LOGIN SCREEN ============ -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-shell">
+    <div class="login-brand">
+      <div class="login-glyph">V</div>
+      <div class="login-name">Vault X</div>
+    </div>
+    <div class="login-tagline">Organization manager</div>
+
+    <form id="authForm">
+      <div class="login-form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Username" required autocomplete="off" />
+      </div>
+
+      <div class="login-form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Password" required autocomplete="off" />
+      </div>
+
+      <div class="login-button-group">
+        <button type="button" class="btn-auth btn-auth-primary" id="registerBtn">Register</button>
+        <button type="button" class="btn-auth btn-auth-secondary" id="loginBtn">Log in</button>
+      </div>
+
+      <div class="login-message" id="message"></div>
+    </form>
+
+    <div class="login-footer">
+      <div class="powered-by">Powered by <span class="uniclvrpass">Vault X</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app" style="display:none;">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="brand-glyph">V</div>
+        <span class="brand-name">Vault X</span>
+      </div>
+    </div>
+
+    <div class="sidebar-list-head">
+      <span class="sidebar-title">Organizations</span>
+      <button class="btn-new" id="newOrgBtn" title="Create Organization" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 5v14M5 12h14"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="org-list" id="orgList">
+      <!-- Orgs dynamically injected here -->
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="footer-row">
+        <div class="footer-user">
+          <span class="user-glyph" id="userGlyph">U</span>
+          <span id="footerUsername">user</span>
+        </div>
+        <a class="footer-link" id="logoutLink" title="Sign out">Sign out</a>
+      </div>
     </div>
   </aside>
 
-  <main class="main">
-    <header class="topbar">
-      <div>
-        <p class="muted small">YOUR PERSONAL STUDY SPACE</p>
-        <h1 id="pageTitle">Dashboard</h1>
+  <main class="main-area">
+    <div class="main-top-bar">
+      <div class="status-indicator" id="statusIndicator">
+        <span class="status-dot"></span>
+        <span id="statusText">Ready</span>
       </div>
-      <span class="status"><span aria-hidden="true">●</span> Study mode</span>
-    </header>
-
-    <section id="home" class="page">
-      <div class="hero">
-        <p class="eyebrow">WELCOME TO STUDYAI</p>
-        <h2>Make every study session count.</h2>
-        <p>Organise your notes, practise with flashcards and test what you know.</p>
-        <button type="button" class="primary" data-go="notes">Start studying →</button>
+      <div class="main-actions">
+        <button class="btn-action primary" id="addAccountBtn">Add account</button>
+        <button class="btn-action danger" id="bulkDeleteBtn" style="display:none;">Delete selected</button>
       </div>
+    </div>
 
-      <div class="stats">
-        <article class="card">
-          <p class="muted">Topics saved</p>
-          <p class="stat-number" id="topicCount">0</p>
-        </article>
-        <article class="card">
-          <p class="muted">Flashcards created</p>
-          <p class="stat-number" id="cardCount">0</p>
-        </article>
-        <article class="card">
-          <p class="muted">Quizzes completed</p>
-          <p class="stat-number" id="quizCount">0</p>
-        </article>
+    <div class="main-scroll">
+      <div class="main-inner" id="mainContent">
+        <!-- Dynamic Table/Empty State injected here -->
       </div>
-
-      <div class="section-heading">
-        <h2>Recent topics</h2>
-        <button type="button" class="text-button" data-go="notes">+ New topic</button>
-      </div>
-      <div id="recentTopics" class="recent-list"></div>
-    </section>
-
-    <section id="notes" class="page" hidden>
-      <div class="card workspace">
-        <h2>Create study notes</h2>
-        <p class="muted">Enter a topic and paste your textbook notes or class material.</p>
-
-        <label for="topic">Topic name</label>
-        <input id="topic" name="topic" placeholder="e.g. Photosynthesis">
-
-        <label for="sourceText">Your notes or study material</label>
-        <textarea id="sourceText" name="sourceText" rows="9"
-          placeholder="Paste your notes here. For the best results, use clear sentences or one fact per line."></textarea>
-
-        <div class="button-row">
-          <button type="button" id="makeNotes" class="primary">Organise my notes</button>
-          <button type="button" id="makeCards" class="secondary">Create flashcards</button>
-          <button type="button" id="makeQuiz" class="secondary">Create quiz</button>
-        </div>
-
-        <p class="muted small">This version organises your input. It does not use a real AI model.</p>
-      </div>
-
-      <div id="notesOutput" class="card output" hidden>
-        <div class="section-heading">
-          <h2>Your revision notes</h2>
-          <button type="button" id="copyNotes" class="secondary">Copy notes</button>
-        </div>
-        <div id="notesContent"></div>
-      </div>
-    </section>
-
-    <section id="flashcards" class="page" hidden>
-      <div class="card workspace">
-        <h2>Flashcards</h2>
-        <p class="muted">Create cards from your notes. Use one fact per line, or write facts as Question: Answer.</p>
-        <label for="flashInput">Paste your notes</label>
-        <textarea id="flashInput" name="flashInput" rows="6"
-          placeholder="What is photosynthesis: The process plants use to make food"></textarea>
-        <button type="button" id="buildCards" class="primary">Build flashcards</button>
-      </div>
-
-      <div id="flashArea" class="card output" hidden>
-        <p class="muted small" id="flashProgress"></p>
-        <button type="button" id="flashCard" class="flashcard">
-          <span id="flashLabel">QUESTION</span>
-          <span id="flashText">Your flashcard appears here</span>
-          <span class="muted small">Click to flip</span>
-        </button>
-        <div class="button-row center">
-          <button type="button" id="prevCard" class="secondary">← Previous</button>
-          <button type="button" id="nextCard" class="primary">Next →</button>
-        </div>
-      </div>
-    </section>
-
-    <section id="quiz" class="page" hidden>
-      <div class="card workspace">
-        <h2>Test your knowledge</h2>
-        <p class="muted">Create a simple practice quiz from your study material.</p>
-        <label for="quizInput">Paste your notes</label>
-        <textarea id="quizInput" name="quizInput" rows="6"
-          placeholder="Enter several facts or sentences to create a quiz."></textarea>
-        <button type="button" id="buildQuiz" class="primary">Generate practice quiz</button>
-      </div>
-
-      <div id="quizArea" class="card output" hidden>
-        <div class="section-heading">
-          <p class="muted small" id="quizProgress"></p>
-          <p class="muted small" id="quizScore"></p>
-        </div>
-        <h2 id="questionText"></h2>
-        <div id="answers" class="answers"></div>
-        <p id="feedback" aria-live="polite"></p>
-        <button type="button" id="nextQuestion" class="primary">Next question →</button>
-      </div>
-    </section>
+    </div>
   </main>
+</div>
 
-  <footer>
-    <p>StudyAI · Your learning, your pace.</p>
-    <p class="muted small">Revision aid only. Always check important facts against your learning materials.</p>
-  </footer>
+<!-- ============ DIALOGS ============ -->
+<div class="dialog-overlay" id="dialogOverlay">
+  <div class="dialog-box" id="dialogBox">
+    <!-- Dialog content injected dynamically -->
+  </div>
+</div>
 
-  <script>
-    /* Bridges the existing script's "hidden" class toggling to the native hidden attribute. */
-    (function () {
-      var els = document.querySelectorAll('[hidden]');
-      els.forEach(function (el) { el.classList.add('hidden'); });
-      var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (m) {
-          var el = m.target;
-          var hasClass = el.classList.contains('hidden');
-          if (hasClass && !el.hasAttribute('hidden')) {
-            el.setAttribute('hidden', '');
-          } else if (!hasClass && el.hasAttribute('hidden')) {
-            el.removeAttribute('hidden');
-          }
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ================================================================
+   ⚙️  PASTE YOUR BACKEND VALUES BELOW
+   ================================================================
+   Replace every "PASTE_..." string with your real value.
+   ================================================================ */
+const CONFIG = {
+  SUPABASE_URL:           "PASTE_YOUR_SUPABASE_URL_HERE",              // e.g. https://abcdefg.supabase.co
+  SUPABASE_FUNCTIONS_URL: "PASTE_YOUR_FUNCTIONS_URL_HERE",             // e.g. https://abcdefg.supabase.co/functions/v1
+  AUTH_ENDPOINT:          "PASTE_YOUR_AUTH_ENDPOINT_HERE",             // e.g. /auth
+  MANAGE_ENDPOINT:        "PASTE_YOUR_MANAGE_ENDPOINT_HERE",           // e.g. /manage-organizations
+  ANON_KEY:               "PASTE_YOUR_SUPABASE_ANON_KEY_HERE",         // optional, if your functions need it
+};
+/* ================================================================ */
+
+/* ================================================================
+   📡  APIs THIS FILE CALLS — IMPLEMENT THESE ON YOUR BACKEND
+   ================================================================
+   POST  ${CONFIG.SUPABASE_FUNCTIONS_URL}${CONFIG.AUTH_ENDPOINT}
+         body: { action: "register" | "login", username, password }
+         returns: { success, userId, username, token }
+
+   POST  ${CONFIG.SUPABASE_FUNCTIONS_URL}${CONFIG.MANAGE_ENDPOINT}
+         headers: { Authorization: "Bearer <token>" }
+         actions:
+           { action: "list_accounts" }
+           { action: "create_organization" }
+           { action: "add_account", subUsername, useRandomPassword, customPassword }
+           { action: "reroll_password", targetUsername }
+           { action: "delete_account", targetUsername }
+           { action: "delete_multiple", targetUsernames: [] }
+   ================================================================ */
+
+  // Base URL for edge functions
+  // 🔧 PASTE VALUE ABOVE in CONFIG.SUPABASE_FUNCTIONS_URL
+  const SUPABASE_FUNCTIONS_URL = CONFIG.SUPABASE_FUNCTIONS_URL;
+
+  // Helper to correctly route to different edge functions dynamically
+  function getApiUrl(action) {
+    // 🔧 Uses CONFIG.AUTH_ENDPOINT and CONFIG.MANAGE_ENDPOINT — edit those in CONFIG
+    return (action === "login" || action === "register")
+      ? `${CONFIG.SUPABASE_FUNCTIONS_URL}${CONFIG.AUTH_ENDPOINT}`
+      : `${CONFIG.SUPABASE_FUNCTIONS_URL}${CONFIG.MANAGE_ENDPOINT}`;
+  }
+
+  /* ---------- Auth / Session ---------- */
+  function getStoredSession() {
+    try {
+      const userId = localStorage.getItem('userId');
+      const username = localStorage.getItem('username');
+      const authToken = localStorage.getItem('authToken');
+      if (userId && username && authToken) return { userId, username, authToken };
+    } catch {}
+    return null;
+  }
+  function clearSession() {
+    try {
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('authToken');
+    } catch {}
+  }
+
+  /* ---------- Login Screen Logic ---------- */
+  const loginScreen = document.getElementById('loginScreen');
+  const appEl = document.getElementById('app');
+  const messageEl = document.getElementById('message');
+  const usernameInput = document.getElementById('username');
+  const passwordInput = document.getElementById('password');
+  const registerBtn = document.getElementById('registerBtn');
+  const loginBtn = document.getElementById('loginBtn');
+
+  function showLoginMessage(text, type = 'error') {
+    messageEl.textContent = text;
+    messageEl.className = `login-message ${type}`;
+  }
+
+  function enterApp() {
+    loginScreen.classList.add('hidden');
+    appEl.style.display = 'grid';
+    initManager();
+  }
+
+  function showLogin() {
+    appEl.style.display = 'none';
+    loginScreen.classList.remove('hidden');
+    usernameInput.value = '';
+    passwordInput.value = '';
+    messageEl.textContent = '';
+    messageEl.className = 'login-message';
+    setTimeout(() => usernameInput.focus(), 100);
+  }
+
+  async function auth(action) {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+      showLoginMessage('Please enter username and password');
+      return;
+    }
+
+    showLoginMessage('Processing...', 'loading');
+    registerBtn.disabled = true;
+    loginBtn.disabled = true;
+
+    try {
+      const response = await fetch(getApiUrl(action), {
+        method: 'POST',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, username, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showLoginMessage(`HTTP ${response.status}: ${data.error || 'Server error'}`);
+        return;
+      }
+
+      if (data.success) {
+        showLoginMessage(
+          action === 'register' ? 'Account created — welcome to Vault X' : 'Welcome back to Vault X',
+          'success'
+        );
+        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('username', data.username);
+        localStorage.setItem('authToken', data.token);
+        setTimeout(() => enterApp(), 700);
+      } else {
+        showLoginMessage(data.error || 'Authentication failed');
+      }
+    } catch (error) {
+      showLoginMessage('Error: ' + error.message);
+    } finally {
+      registerBtn.disabled = false;
+      loginBtn.disabled = false;
+    }
+  }
+
+  registerBtn.addEventListener('click', (e) => { e.preventDefault(); auth('register'); });
+  loginBtn.addEventListener('click', (e) => { e.preventDefault(); auth('login'); });
+  document.getElementById('authForm').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); auth('login'); }
+  });
+
+  /* ============================================================
+     ORGANIZATION MANAGER LOGIC
+     ============================================================ */
+  let ownerUsername = ""; // e.g. "synapse"
+  let orgNamespace = "";  // e.g. "synapse@"
+  let selectedAccounts = new Set();
+  let accountCache = [];
+
+  const orgListEl = document.getElementById('orgList');
+  const mainContentEl = document.getElementById('mainContent');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const statusText = document.getElementById('statusText');
+  const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+  const addAccountBtn = document.getElementById('addAccountBtn');
+  const logoutLink = document.getElementById('logoutLink');
+  const footerUsername = document.getElementById('footerUsername');
+  const userGlyph = document.getElementById('userGlyph');
+
+  /* ---------- Toasts ---------- */
+  function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icon = type === 'success'
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    el.innerHTML = `${icon}<span>${msg}</span>`;
+    document.getElementById('toastContainer').appendChild(el);
+    setTimeout(() => {
+      el.classList.add('exit');
+      setTimeout(() => el.remove(), 250);
+    }, 3500);
+  }
+
+  function setStatus(status) {
+    if (status === 'ready') {
+      statusText.textContent = 'Ready';
+      statusIndicator.className = 'status-indicator';
+    } else if (status === 'loading') {
+      statusText.textContent = 'Working…';
+      statusIndicator.className = 'status-indicator loading';
+    } else if (status === 'saved') {
+      statusText.textContent = 'Done';
+      statusIndicator.className = 'status-indicator saved';
+      setTimeout(() => setStatus('ready'), 1800);
+    }
+  }
+
+  /* ---------- API Calls ---------- */
+  async function apiCall(body) {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      showLogin();
+      throw new Error("Not authenticated");
+    }
+
+    try {
+      const response = await fetch(getApiUrl(body.action), {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('API Call Failed:', error);
+      throw error;
+    }
+  }
+
+  /* ---------- Initialization ---------- */
+  async function initManager() {
+    const session = getStoredSession();
+    if (!session) return showLogin();
+
+    footerUsername.textContent = session.username;
+    userGlyph.textContent = session.username.charAt(0).toUpperCase();
+
+    ownerUsername = session.username;
+    orgNamespace = ownerUsername + "@";
+
+    renderAppUI();
+  }
+
+  function renderAppUI() {
+    // Display the clean username everywhere, no @ symbol
+    orgListEl.innerHTML = `
+      <div class="org-item active">
+        <span class="org-dot"></span>
+        <div class="org-item-content">
+          <div class="org-item-title">${ownerUsername}</div>
+          <div class="org-item-sub">Personal Organization</div>
+        </div>
+      </div>
+    `;
+
+    fetchAccounts(); // Fetch accounts from Edge Function
+  }
+
+  // Fetch all associated sub-accounts for the logged-in user
+  async function fetchAccounts() {
+    try {
+      setStatus('loading');
+      const res = await apiCall({ action: "list_accounts" });
+
+      if (res.success && Array.isArray(res.accounts)) {
+        accountCache = res.accounts; // Update local cache
+        renderAccountsTable(accountCache);
+      } else {
+        renderEmptyState();
+      }
+    } catch (error) {
+      toast(error.message, 'error');
+      renderEmptyState();
+    } finally {
+      setStatus('ready');
+    }
+  }
+
+  function renderEmptyState() {
+    mainContentEl.innerHTML = `
+      <div class="org-header">
+        <div>
+          <div class="org-title">${ownerUsername}</div>
+        </div>
+      </div>
+      <div class="org-meta">
+        <span>Organization</span>
+        <span class="dot"></span>
+        <span>Active</span>
+      </div>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <div class="empty-state-title">No Sub-Accounts Yet</div>
+        <div class="empty-state-text">Create your first sub-account to manage access for this organization.</div>
+      </div>
+    `;
+  }
+
+  function renderAccountsTable(accounts) {
+    if (!accounts || accounts.length === 0) {
+      renderEmptyState();
+      return;
+    }
+
+    selectedAccounts.clear();
+    bulkDeleteBtn.style.display = 'none';
+
+    const rowsHtml = accounts.map(acc => `
+      <tr>
+        <td class="checkbox-cell">
+          <input type="checkbox" data-user="${acc.username}" class="row-checkbox">
+        </td>
+        <td class="td-username">${acc.username}</td>
+        <td>
+          <div class="row-actions">
+            <button class="btn-row" data-action="reroll" data-user="${acc.username}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+              </svg>
+              Reroll
+            </button>
+            <button class="btn-row danger" data-action="delete" data-user="${acc.username}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    mainContentEl.innerHTML = `
+      <div class="org-header">
+        <div>
+          <div class="org-title">${ownerUsername}</div>
+        </div>
+      </div>
+      <div class="org-meta">
+        <span>Accounts</span>
+        <span class="dot"></span>
+        <span>${accounts.length} total</span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th class="checkbox-cell">
+                <input type="checkbox" id="selectAll">
+              </th>
+              <th>Username</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    attachTableEventListeners();
+  }
+
+  function attachTableEventListeners() {
+    document.querySelectorAll('.row-checkbox').forEach(cb => {
+      cb.addEventListener('change', (e) => {
+        const user = e.target.dataset.user;
+        if (e.target.checked) selectedAccounts.add(user);
+        else selectedAccounts.delete(user);
+        updateBulkDeleteBtn();
+      });
+    });
+
+    const selectAllCb = document.getElementById('selectAll');
+    if (selectAllCb) {
+      selectAllCb.addEventListener('change', (e) => {
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+          cb.checked = e.target.checked;
+          if (e.target.checked) selectedAccounts.add(cb.dataset.user);
+          else selectedAccounts.delete(cb.dataset.user);
         });
+        updateBulkDeleteBtn();
       });
-      els.forEach(function (el) {
-        observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    }
+
+    document.querySelectorAll('.btn-row').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const action = btn.dataset.action;
+        const user = btn.dataset.user;
+        // The username in the dataset is fully-qualified (e.g. clover@synapse).
+        if (action === 'reroll') openRerollDialog(user);
+        else if (action === 'delete') openDeleteDialog([user]);
       });
-      document.querySelectorAll('.page, .output').forEach(function (el) {
-        observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
+
+  function updateBulkDeleteBtn() {
+    if (selectedAccounts.size > 0) {
+      bulkDeleteBtn.style.display = 'flex';
+      bulkDeleteBtn.textContent = `Delete Selected (${selectedAccounts.size})`;
+    } else {
+      bulkDeleteBtn.style.display = 'none';
+    }
+  }
+
+  /* ---------- Dialog Management ---------- */
+  const dialogOverlay = document.getElementById('dialogOverlay');
+  const dialogBox = document.getElementById('dialogBox');
+
+  function closeDialog() {
+    dialogOverlay.classList.remove('active');
+  }
+
+  dialogOverlay.addEventListener('click', (e) => {
+    if (e.target === dialogOverlay) closeDialog();
+  });
+
+  /* ---------- Add Account Dialog ---------- */
+  addAccountBtn.addEventListener('click', () => {
+    const dialogHtml = `
+      <div class="dialog-title">Add Sub-Account</div>
+      <div class="dialog-text">Create a new account under the <strong>${ownerUsername}</strong> organization.</div>
+
+      <div class="dialog-input-group">
+        <label>Username</label>
+        <input type="text" id="subUsernameInput" class="dialog-input" placeholder="name" autocomplete="off">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:6px;">
+          Final username: <span id="fullUsernamePreview">name@${ownerUsername}</span>
+        </div>
+      </div>
+
+      <div class="dialog-input-group">
+        <label>Password Method</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" id="randomPassBtn">Generate Random</button>
+          <button class="toggle-btn" id="customPassBtn">Custom Password</button>
+        </div>
+      </div>
+
+      <div class="dialog-input-group" id="customPassGroup" style="display:none;">
+        <label>Custom Password</label>
+        <input type="text" id="customPassInput" class="dialog-input" placeholder="Min 6 characters">
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn-primary" id="cancelDialog">Cancel</button>
+        <button class="btn-primary main" id="confirmAddAccount">Create Account</button>
+      </div>
+    `;
+    dialogBox.innerHTML = dialogHtml;
+    dialogOverlay.classList.add('active');
+
+    const subInput = document.getElementById('subUsernameInput');
+    const preview = document.getElementById('fullUsernamePreview');
+    subInput.addEventListener('input', () => {
+      preview.textContent = `${subInput.value || 'name'}@${ownerUsername}`;
+    });
+
+    const randomBtn = document.getElementById('randomPassBtn');
+    const customBtn = document.getElementById('customPassBtn');
+    const customPassGroup = document.getElementById('customPassGroup');
+
+    randomBtn.onclick = () => {
+      randomBtn.classList.add('active');
+      customBtn.classList.remove('active');
+      customPassGroup.style.display = 'none';
+    };
+    customBtn.onclick = () => {
+      customBtn.classList.add('active');
+      randomBtn.classList.remove('active');
+      customPassGroup.style.display = 'block';
+    };
+
+    document.getElementById('cancelDialog').onclick = closeDialog;
+    document.getElementById('confirmAddAccount').onclick = async () => {
+      const sub = subInput.value.trim();
+      if (!sub || !/^[a-zA-Z0-9]+$/.test(sub)) {
+        toast('Invalid username. Use only letters and numbers.', 'error');
+        return;
+      }
+
+      const useRandom = randomBtn.classList.contains('active');
+      const customPass = document.getElementById('customPassInput').value;
+
+      try {
+        setStatus('loading');
+
+        // Attempt to add the account directly.
+        // If the org doesn't exist yet, it will throw the specific error.
+        try {
+          const res = await apiCall({
+            action: 'add_account',
+            subUsername: sub,
+            useRandomPassword: useRandom,
+            customPassword: useRandom ? null : customPass
+          });
+          openCredentialsDialog(res.username, res.password, res.randomGenerated);
+        } catch (err) {
+          // THE MAGIC FIX: If the backend complains the org doesn't exist, create it instantly, then retry!
+          if (err.message.includes("You must create an organization first")) {
+            await apiCall({ action: 'create_organization' });
+
+            // Retry creating the account now that the namespace exists
+            const res = await apiCall({
+              action: 'add_account',
+              subUsername: sub,
+              useRandomPassword: useRandom,
+              customPassword: useRandom ? null : customPass
+            });
+            openCredentialsDialog(res.username, res.password, res.randomGenerated);
+          } else {
+            // If it's a different error (like duplicate username), throw it to the outer catch
+            throw err;
+          }
+        }
+      } catch(e) {
+        toast(e.message, 'error');
+      } finally {
+        setStatus('saved');
+      }
+    };
+  });
+
+  /* ---------- Credentials Dialog (after adding) ---------- */
+  function openCredentialsDialog(username, password, isRandom) {
+    dialogBox.innerHTML = `
+      <div class="dialog-title">Account Created</div>
+      <div class="dialog-text">
+        ${isRandom ? 'A secure random password was generated.' : 'Account is ready.'}
+        Please copy the credentials now. For security reasons, the password will not be shown again.
+      </div>
+
+      <div class="dialog-input-group">
+        <label>Username</label>
+        <input type="text" class="dialog-input mono" value="${username}" readonly>
+      </div>
+
+      <div class="dialog-input-group">
+        <label>Password</label>
+        <input type="text" class="dialog-input mono" value="${password}" readonly>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn-primary" id="copyCredsBtn">Copy Credentials</button>
+        <button class="btn-primary main" id="acceptCredsBtn">I've saved them</button>
+      </div>
+    `;
+    dialogOverlay.classList.add('active');
+
+    document.getElementById('copyCredsBtn').onclick = () => {
+      const text = `Username: ${username}\nPassword: ${password}`;
+      navigator.clipboard.writeText(text).then(() => {
+        toast('Credentials copied to clipboard');
       });
-    })();
-  </script>
-  <script src="script.js" defer></script>
+    };
+
+    document.getElementById('acceptCredsBtn').onclick = () => {
+      fetchAccounts(); // Refresh from backend instead of pushing to local array
+      closeDialog();
+    };
+  }
+
+  /* ---------- Reroll Password Dialog ---------- */
+  function openRerollDialog(username) {
+    dialogBox.innerHTML = `
+      <div class="dialog-title">Reroll Password</div>
+      <div class="dialog-text">
+        Are you sure you want to generate a new password for <strong>${username}</strong>?
+        The old password will immediately stop working.
+      </div>
+      <div class="dialog-actions">
+        <button class="btn-primary" id="cancelDialog">Cancel</button>
+        <button class="btn-primary main" id="confirmReroll">Generate New Password</button>
+      </div>
+    `;
+    dialogOverlay.classList.add('active');
+
+    document.getElementById('cancelDialog').onclick = closeDialog;
+    document.getElementById('confirmReroll').onclick = async () => {
+      try {
+        setStatus('loading');
+        const res = await apiCall({
+          action: 'reroll_password',
+          targetUsername: username
+        });
+        openNewPasswordDialog(res.username, res.newPassword);
+      } catch(e) {
+        toast(e.message, 'error');
+        setStatus('ready');
+      }
+    };
+  }
+
+  function openNewPasswordDialog(username, newPassword) {
+    dialogBox.innerHTML = `
+      <div class="dialog-title">Password Updated</div>
+      <div class="dialog-text">
+        The password for <strong>${username}</strong> has been rerolled. Copy the new password now.
+      </div>
+      <div class="dialog-input-group">
+        <label>New Password</label>
+        <input type="text" class="dialog-input mono" value="${newPassword}" readonly>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn-primary" id="copyPassBtn">Copy Password</button>
+        <button class="btn-primary main" id="closeDialogBtn">Done</button>
+      </div>
+    `;
+    dialogOverlay.classList.add('active');
+    setStatus('saved');
+
+    document.getElementById('copyPassBtn').onclick = () => {
+      navigator.clipboard.writeText(newPassword).then(() => {
+        toast('Password copied to clipboard');
+      });
+    };
+    document.getElementById('closeDialogBtn').onclick = closeDialog;
+  }
+
+  /* ---------- Delete Dialogs ---------- */
+  function openDeleteDialog(usernames) {
+    const isMultiple = usernames.length > 1;
+    dialogBox.innerHTML = `
+      <div class="dialog-title">Delete ${isMultiple ? 'Accounts' : 'Account'}</div>
+      <div class="dialog-text">
+        You are about to delete ${isMultiple ? `${usernames.length} accounts` : `<strong>${usernames[0]}</strong>`}.
+        This action cannot be undone.
+      </div>
+      <div class="dialog-actions">
+        <button class="btn-primary" id="cancelDialog">Cancel</button>
+        <button class="btn-primary destructive" id="confirmDelete">Delete</button>
+      </div>
+    `;
+    dialogOverlay.classList.add('active');
+
+    document.getElementById('cancelDialog').onclick = closeDialog;
+    document.getElementById('confirmDelete').onclick = async () => {
+      try {
+        setStatus('loading');
+        if (isMultiple) {
+          const res = await apiCall({
+            action: 'delete_multiple',
+            targetUsernames: usernames
+          });
+          toast(`Deleted ${res.deletedCount} accounts`);
+        } else {
+          await apiCall({
+            action: 'delete_account',
+            targetUsername: usernames[0]
+          });
+          toast(`Deleted ${usernames[0]}`);
+        }
+
+        fetchAccounts(); // Refresh from backend
+        closeDialog();
+      } catch(e) {
+        toast(e.message, 'error');
+      } finally {
+        setStatus('saved');
+      }
+    };
+  }
+
+  bulkDeleteBtn.addEventListener('click', () => {
+    const users = Array.from(selectedAccounts);
+    if (users.length > 0) openDeleteDialog(users);
+  });
+
+  /* ---------- Logout ---------- */
+  logoutLink.addEventListener('click', () => {
+    clearSession();
+    ownerUsername = "";
+    orgNamespace = "";
+    accountCache = [];
+    showLogin();
+  });
+
+  /* ---------- Boot ---------- */
+  (function boot() {
+    const session = getStoredSession();
+    if (session) enterApp();
+    else showLogin();
+  })();
+</script>
 </body>
 </html>
