@@ -82,12 +82,12 @@
 
     .login-shell {
       width: 100%;
-      max-width: 380px;
+      max-width: 420px;
       margin: auto;
       background: var(--panel);
       border: 1px solid var(--panel-edge);
-      border-radius: 6px;
-      padding: 44px 40px 32px;
+      border-radius: 16px;
+      padding: 52px 44px 36px;
       position: relative;
     }
 
@@ -99,13 +99,13 @@
     .login-glyph {
       font-family: var(--serif-mark);
       font-weight: 400;
-      font-size: 56px;
+      font-size: 72px;
       line-height: 1;
       color: #ffffff;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
     }
     .login-name {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 600;
       letter-spacing: -0.01em;
       color: #ffffff;
@@ -117,7 +117,7 @@
       text-transform: uppercase;
       color: var(--text-muted);
       text-align: center;
-      margin: 6px 0 28px;
+      margin: 8px 0 32px;
       padding-bottom: 0;
       border-bottom: none;
     }
@@ -127,7 +127,7 @@
       width: 55%;
       height: 1px;
       background: rgba(255, 255, 255, 0.55);
-      margin: 22px auto 0;
+      margin: 24px auto 0;
     }
 
     /* Superscript "99" on the brand mark — sized and raised so it
@@ -139,19 +139,19 @@
       vertical-align: baseline;
       position: relative;
       top: -0.90em;
-      margin-left: 2px;
+      margin-left: 3px;
       letter-spacing: -0.02em;
     }
 
-    .login-form-group { margin-bottom: 22px; }
+    .login-form-group { margin-bottom: 26px; }
     .login-form-group label {
       display: block;
-      font-size: 10.5px;
+      font-size: 11px;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--text-muted);
       font-weight: 500;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
     .login-form-group input {
       width: 100%;
@@ -159,8 +159,8 @@
       border: none;
       border-bottom: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 0;
-      padding: 6px 0 8px;
-      font-size: 15px;
+      padding: 8px 0 10px;
+      font-size: 16px;
       color: var(--text);
       outline: none;
       transition: border-color 120ms ease;
@@ -177,12 +177,12 @@
     .login-button-group {
       display: flex;
       gap: 12px;
-      margin-top: 30px;
+      margin-top: 34px;
     }
     .btn-auth {
       flex: 1;
-      padding: 12px 16px;
-      border-radius: 3px;
+      padding: 14px 18px;
+      border-radius: 8px;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.18em;
@@ -214,7 +214,7 @@
     .login-message {
       font-size: 12.5px;
       text-align: center;
-      margin-top: 18px;
+      margin-top: 20px;
       min-height: 19px;
       letter-spacing: 0.01em;
       color: var(--text-muted);
@@ -225,8 +225,8 @@
     .login-message.loading { color: var(--text-soft); }
 
     .login-footer {
-      margin-top: 32px;
-      padding-top: 18px;
+      margin-top: 36px;
+      padding-top: 22px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       text-align: center;
     }
@@ -304,7 +304,7 @@
       border: 1px solid rgba(255, 255, 255, 0.35);
       cursor: pointer;
       display: grid; place-items: center;
-      border-radius: 3px;
+      border-radius: 6px;
       transition: var(--t);
     }
     .btn-new:hover { border-color: #ffffff; }
@@ -386,7 +386,7 @@
     .footer-user .user-glyph {
       width: 22px; height: 22px;
       flex-shrink: 0;
-      border-radius: 4px;
+      border-radius: 6px;
       border: 1px solid var(--line);
       color: #ffffff;
       display: grid; place-items: center;
@@ -449,11 +449,11 @@
 
     .main-actions { display: flex; gap: 8px; }
     .btn-action {
-      height: 30px;
-      padding: 0 14px;
+      height: 32px;
+      padding: 0 16px;
       background: transparent;
       border: 1px solid rgba(255, 255, 255, 0.35);
-      border-radius: 3px;
+      border-radius: 8px;
       cursor: pointer;
       color: #ffffff;
       font-size: 11px;
@@ -534,7 +534,7 @@
       color: var(--text-muted);
       background: var(--panel);
       border: 1px solid var(--panel-edge);
-      border-radius: 6px;
+      border-radius: 12px;
     }
     .empty-state svg {
       width: 28px; height: 28px;
@@ -553,7 +553,7 @@
     .table-wrapper {
       background: var(--panel);
       border: 1px solid var(--panel-edge);
-      border-radius: 6px;
+      border-radius: 12px;
       overflow-x: auto;
       overflow-y: hidden;
     }
@@ -592,7 +592,7 @@
       width: 15px;
       height: 15px;
       border: 1px solid rgba(255, 255, 255, 0.35);
-      border-radius: 3px;
+      border-radius: 5px;
       cursor: pointer;
       position: relative;
       background: transparent;
@@ -625,8 +625,8 @@
     .btn-row {
       background: transparent;
       border: 1px solid rgba(255, 255, 255, 0.28);
-      border-radius: 3px;
-      padding: 5px 10px;
+      border-radius: 6px;
+      padding: 6px 12px;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.12em;
@@ -669,16 +669,16 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 14px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
       margin: auto;
-      padding: 28px;
+      padding: 30px;
     }
 
     .dialog-title {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 600;
       margin-bottom: 6px;
       color: #ffffff;
@@ -687,7 +687,7 @@
       font-size: 14px;
       color: var(--text-soft);
       line-height: 1.5;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
     .dialog-text strong { color: #ffffff; font-weight: 600; }
     .dialog-input-group {
@@ -708,7 +708,7 @@
       border: none;
       border-bottom: 1px solid rgba(255, 255, 255, 0.35);
       border-radius: 0;
-      padding: 6px 0 8px;
+      padding: 7px 0 9px;
       font-size: 15px;
       color: var(--text);
       outline: none;
@@ -728,18 +728,18 @@
       display: flex;
       gap: 4px;
       margin-bottom: 12px;
-      padding: 3px;
+      padding: 4px;
       background: transparent;
       border: 1px solid var(--line);
-      border-radius: 4px;
+      border-radius: 9px;
     }
     .toggle-btn {
       flex: 1;
-      padding: 8px 10px;
+      padding: 9px 10px;
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-muted);
-      border-radius: 3px;
+      border-radius: 6px;
       cursor: pointer;
       font-size: 11px;
       font-weight: 600;
@@ -754,10 +754,10 @@
       color: var(--btn-solid-fg);
     }
 
-    .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
+    .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 26px; flex-wrap: wrap; }
     .btn-primary {
-      padding: 10px 16px;
-      border-radius: 3px;
+      padding: 11px 18px;
+      border-radius: 8px;
       border: 1px solid rgba(255, 255, 255, 0.5);
       background: transparent;
       color: #ffffff;
@@ -804,8 +804,8 @@
       background: var(--panel);
       border: 1px solid var(--line);
       border-left: 3px solid var(--line);
-      padding: 10px 14px;
-      border-radius: 6px;
+      padding: 11px 16px;
+      border-radius: 10px;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
@@ -856,10 +856,12 @@
       .sidebar-footer { border-top: none; padding: 8px 16px 8px 8px; }
       .footer-user span:last-child { max-width: 80px; }
       .main-top-bar { padding: 0 12px; }
-      .btn-action { padding: 0 10px; }
+      .btn-action { padding: 0 12px; }
       .main-inner { padding: 20px 16px 64px; }
-      .login-shell { padding: 36px 26px 26px; }
-      .dialog-box { padding: 22px 20px; }
+      .login-shell { padding: 40px 28px 28px; }
+      .login-glyph { font-size: 60px; }
+      .login-name { font-size: 26px; }
+      .dialog-box { padding: 24px 22px; }
       .toast-container { left: 50%; right: auto; bottom: 20px; transform: translateX(-50%); width: calc(100% - 32px); align-items: center; }
       .toast { min-width: 0; width: 100%; }
     }
